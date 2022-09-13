@@ -1,0 +1,25 @@
+.Gbuton {
+    position: relative;
+    
+    height: 35px;
+    border-style: none;
+    background-color: rgb(103,58,183);
+    color: white;
+    padding-left: 20px;
+    padding-right: 20px;
+    border-radius: 5px;
+    font-family: Verdana;
+    font-weight: bold;
+    outline: none;
+    cursor: pointer;
+}
+
+.Gbuton:hover {
+    background-color: rgb(121, 89, 177);
+}
+
+.Gbuton:active {
+    background-color: rgb(103,58,183);
+}
+
+
