@@ -14,7 +14,7 @@ let t = null;
 let tData = null;
 
 // let dL = null;   // Not used 
-
+//Hello there
 
 
 // Vérifier si le cours a besoin d'être enregistré avant de fermer l'appli
