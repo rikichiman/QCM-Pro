@@ -3,18 +3,17 @@ const { ipcRenderer, remote } = require('electron');
 const {dialog, Menu, MenuItem} = remote;
 const {test} = require('./js/test');
 const {scormGeny} = require('./js/scormGeny');
-//const {dataLoader} = require('./js/dataLoader');     //Not used
+const {dataLoader} = require('./js/dataLoader');
 const { uuid } = require('uuidv4');
 
 
-let timeOut = null;   // --> used in regularSave function
+let timeOut = null;   //used in regularSave function
 let openedFile = null;
 let t = null;
 
 let tData = null;
+let dL = null;
 
-// let dL = null;   // Not used 
-//Hello there
 
 
 // Vérifier si le cours a besoin d'être enregistré avant de fermer l'appli
@@ -43,7 +42,13 @@ document.getElementById('open').addEventListener('click', (e) =>{
 document.getElementById('exit_test').addEventListener('click', (e) => {
     e.preventDefault();
     clearInterval(timeOut);   // stop automatic save
-    saveTest(openedFile+'\\manifest.json');  // One last save to be sure is UP to date
+    
+    // One last save to be sure is UP to date
+     if (process.platform == 'darwin') {
+        saveTest(openedFile+'/manifest.json');     // this is for MAC machines
+    }else{
+        saveTest(openedFile+'\\manifest.json');     // this is for windows machiness
+    }
     openedFile = null;
     tData = null;
     t = null;    
@@ -131,7 +136,8 @@ function newTest() {
         // Create necessary test folders !
         if (!fs.existsSync(path)){
             fs.mkdirSync(path);
-            fs.mkdirSync(path+'\\medias');
+            if (process.platform == 'darwin') fs.mkdirSync(path+'/medias');    // for MAC
+            else fs.mkdirSync(path+'\\medias');                                 // for windows
             process.chdir("../");
         }
         document.getElementById('welcome').style.display='none';
@@ -163,8 +169,14 @@ function newTest() {
 regularSave = () => {
     timeOut = setInterval(() => {
         if ( openedFile != null && test.hasChanged == true ) {
-            saveTest(openedFile+'\\manifest.json');
-            console.log("Save to : "+openedFile+'\\manifest.json');
+            if (process.platform == 'darwin') {
+                saveTest(openedFile+'/manifest.json');     // this is for MAC machines
+            }else{
+                saveTest(openedFile+'\\manifest.json');     // this is for windows machiness
+            }
+            
+                
+                //console.log("Save to : "+openedFile+'\\manifest.json');
         }
     }, 3000);
 }
