@@ -129,7 +129,7 @@ class scormGeny {
         let jsCode = `var quest = ${JSON.stringify(questionsDOM)};
                        var i=0;
                        var j=0; 
-                        //console.log(quest);
+                        console.log(quest);
                         var c = ${JSON.stringify(this.questions)}; 
                         var params =  ${JSON.stringify(this.tData.params)};  //--- test parameters
                         showQuestions();
@@ -179,8 +179,8 @@ class scormGeny {
                                         var dref = firebase.database().ref();
                                         dref.child("tests/Test"+params.testID+"/"+studentName).set({"score":S, "answers" : userAnswers});`
                         }    
-                        jsCode += ` //console.log('You SCORE = '+S+' / 20');
-                                    //console.log(userAnswers);
+                        jsCode += ` console.log('You SCORE = '+S+' / 20');
+                                    console.log(userAnswers);
                                     //Send SCORE to the LMS
                                     RecordTest(S);}`;
         fs.writeFileSync( this.testPath+'\\ScoTEST\\html\\js\\testQCM.js', jsCode );
