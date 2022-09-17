@@ -23,7 +23,12 @@ window.addEventListener('beforeunload', (event) => {
     if ( t.hasChanged == true &&  openedFile != null) {
        // let answer = saveMessage();
        // (answer==1)?saveFunction():null;
-       saveTest(openedFile+'\\manifest.json');
+       // One last save to be sure is UP to date
+        if (process.platform == 'darwin') {
+            saveTest(openedFile+'/manifest.json');     // this is for MAC machines
+        }else{
+            saveTest(openedFile+'\\manifest.json');     // this is for windows machiness
+        }
     }
 });
 
@@ -44,7 +49,7 @@ document.getElementById('exit_test').addEventListener('click', (e) => {
     clearInterval(timeOut);   // stop automatic save
     
     // One last save to be sure is UP to date
-     if (process.platform == 'darwin') {
+    if (process.platform == 'darwin') {
         saveTest(openedFile+'/manifest.json');     // this is for MAC machines
     }else{
         saveTest(openedFile+'\\manifest.json');     // this is for windows machiness
@@ -74,7 +79,10 @@ document.getElementById('scorm_test').addEventListener('click', (e) => {
 
 
 openTest = () => {
-    let options = {title:"Ouvrir un Test",defaultPath:(openedFile!=null)?openedFile:'C:\\', properties:["openDirectory"]};
+    let options = { title:"Ouvrir un Test",
+                    defaultPath:(openedFile!=null)?openedFile:(process.platform != 'darwin')?'C:\\':'/', 
+                    properties:["openDirectory"]
+                };
 
     //Synchronous
     let dir = dialog.showOpenDialogSync(options);
@@ -128,7 +136,7 @@ loadTest = (path) => {
 function newTest() {
     
     let path = dialog.showSaveDialogSync(null , {   title:"Enregistrer un test QCM", 
-                                                    defaultPath:(openedFile!=null)?openedFile:'C:\\', 
+                                                    defaultPath:(openedFile!=null)?openedFile:(process.platform != 'darwin')?'C:\\':'/', 
                                                     properties:[""]
                                                 } );
     if (path != undefined) {
