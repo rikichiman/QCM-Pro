@@ -12,7 +12,7 @@ let openedFile = null;
 let t = null;
 
 let tData = null;
-let dL = null;    // Not used
+let dL = null;    // Not used halo there
 
 
 
