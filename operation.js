@@ -3,7 +3,7 @@ const { ipcRenderer, remote } = require('electron');
 const {dialog, Menu, MenuItem} = remote;
 const {test} = require('./js/test');
 const {scormGeny} = require('./js/scormGeny');
-const {dataLoader} = require('./js/dataLoader');
+//const {dataLoader} = require('./js/dataLoader');  // Not used
 const { uuid } = require('uuidv4');
 
 
@@ -12,7 +12,7 @@ let openedFile = null;
 let t = null;
 
 let tData = null;
-let dL = null;
+//let dL = null;    // Not used
 
 
 
