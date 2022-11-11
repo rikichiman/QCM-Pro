@@ -73,8 +73,6 @@ class scormGeny {
 
     }
 
-
-
     makeTest(qList) {
 
         let doc = `<html> <head><link rel="stylesheet" href="css/style.css"><script src="js/scormfunctions.js"  type="text/javascript"></script></head><body onload="loadFunction();" oncontextmenu = "return false">`;
@@ -86,7 +84,7 @@ class scormGeny {
                 </div>
                 <div id="finish" >
                     <span class="end"> 
-                        <center>Fin du test. Vos reponses sont envoyees !
+                        <center>Fin du test. Vos réponses sont envoyées !
                             Appuyez sur "Terminer l'activite" pour revenir au cours.</center>
                     </span>
                     <center><img src="../medias/finish.png"/></center>
@@ -110,21 +108,13 @@ class scormGeny {
                 doc += `</body></html>`;
         
         fs.writeFileSync( this.testPath+'\\ScoTEST\\html\\index.html', doc );
-        
-        
+
         this.makeJS( this.makeQuestions( qList ) );
-        
-        
+
         //console.log(this.questions);
     }
 
-   
-
-   
-
-
     makeJS( questionsDOM ) {
-        
 
         let jsCode = `var quest = ${JSON.stringify(questionsDOM)};
                        var i=0;
@@ -138,7 +128,20 @@ class scormGeny {
                             let question = document.createElement("div");
                             question.setAttribute("class","question");
                             question.innerHTML = quest[i].qDom;
-                            document.getElementById("test").appendChild(question);
+                            document.getElementById("test").appendChild(question);`
+                            
+                    if (this.tData.params.mixAnswers == true) {
+                        jsCode+=` 
+                                shuffleArray(array) {
+                                    for (let i = array.length - 1; i > 0; i--) {
+                                        const j = Math.floor(Math.random() * (i + 1));
+                                        [array[i], array[j]] = [array[j], array[i]];
+                                    }
+                                }
+                                shuffleArray(quest[i].answers); 
+                            `
+                    }
+                    jsCode+=`
                             for ( j=0; j < quest[i].answers.length; j++ ) {
                                 question.getElementsByClassName("answerZone")[0].innerHTML += quest[i].answers[j];
                             }
@@ -200,7 +203,7 @@ class scormGeny {
         return questions;
     }
 
-    makeQuestion( qData, number ) {
+    makeQuestion( qData, qnumber ) {
 
         
         let question = {
@@ -213,7 +216,7 @@ class scormGeny {
 
         questionDOM += `<div class= 'questionZone'>    
                             <div class='questionText'>
-                                <span class='qNumber'>Question ${number}:</span> 
+                                <span class='qNumber'>Question ${qnumber}:</span> 
                                 ${qData.qText}
                             </div>
                             <div class='questionPicture'>`;
@@ -227,32 +230,32 @@ class scormGeny {
         //create answers
         this.questions.push({qUID:qData.quid,qText:qData.qText, a:0});
         question.qDom = questionDOM;
-        question.answers = this.makeAnswers( qData.answers, number ) ;
+        question.answers = this.makeAnswers( qData.answers, qnumber ) ;
         
         
         return question;                                    
     }
 
-    makeAnswers( aList, number ) {    // aList is the answer list for a question
+    makeAnswers( aList, qnumber ) {    // aList is the answer list for a question
         
         let answers = [];
         
         let answerNumber = 1;
         aList.forEach(aData => {
-               answers.push( this.makeAnswer( aData, number, answerNumber++ ) ); 
+               answers.push( this.makeAnswer( aData, qnumber, answerNumber++ ) ); 
         });
 
         return answers;
 
     }
 
-    makeAnswer( aData, number, answerNumber ) {
+    makeAnswer( aData, qnumber, answerNumber ) {
 
         let answerDOM = '';
         
         answerDOM = ` <div class='answerItem'>
                                     <div class='answerText'>
-                                        <span> <input type='radio' name='q${number}' value = "${aData.aText}"  aID = '${answerNumber}' /> ${aData.aText} </span>
+                                        <span> <input type='radio' name='q${qnumber}' value = "${aData.aText}"  aID = '${answerNumber}' /> ${aData.aText} </span>
                                     </div>
                                     <div class='answerPicture'>`;
 
@@ -261,10 +264,12 @@ class scormGeny {
         }
         answerDOM += `</div></div>`;
 
-        if (aData.isCorrect == true) this.questions[number-1].a = answerNumber;
+        if (aData.isCorrect == true) this.questions[qnumber-1].a = answerNumber;
 
         return answerDOM;
     }
+
+    
 
 }
 

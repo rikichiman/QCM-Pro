@@ -25,10 +25,9 @@ class answer {
                                 </div>`;
 
         this.answerData = answerData;     
-        this.answerPic = new picture(this);    
+        this.answerPic = new picture(this);
         //this.dom.getElementsByClassName('image_container')[0].appendChild(this.answerPic.dom);                       
         this.initEvent();
-
     }
 
     initEvent() {
