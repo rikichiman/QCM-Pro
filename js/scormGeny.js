@@ -119,33 +119,30 @@ class scormGeny {
         let jsCode = `var quest = ${JSON.stringify(questionsDOM)};
                        var i=0;
                        var j=0; 
-                        console.log(quest);
+                        //console.log(quest);
                         var c = ${JSON.stringify(this.questions)}; 
                         var params =  ${JSON.stringify(this.tData.params)};  //--- test parameters
                         showQuestions();
+                        //Mixer les reponses
+                        //
+                        function shuffleArray(array) {
+                            for (let i = array.length - 1; i > 0; i--) {
+                                const j = Math.floor(Math.random() * (i + 1));
+                                [array[i], array[j]] = [array[j], array[i]];
+                            }
+                        }
                     function showQuestions(){
                         for( i=0; i < quest.length; i++ ){
                             let question = document.createElement("div");
                             question.setAttribute("class","question");
                             question.innerHTML = quest[i].qDom;
-                            document.getElementById("test").appendChild(question);`
+                            document.getElementById("test").appendChild(question); `
                             
                     if (this.tData.params.mixAnswers == true) {
-                        jsCode+=` 
-                                //Mixer les reponses
-                                //
-                                shuffleArray(array) {
-                                    for (let i = array.length - 1; i > 0; i--) {
-                                        const j = Math.floor(Math.random() * (i + 1));
-                                        [array[i], array[j]] = [array[j], array[i]];
-                                    }
-                                }
-                                shuffleArray(quest[i].answers); 
-                            `
+                        jsCode+=` shuffleArray(quest[i].answers); `
                     }
-                    jsCode+=`
-                            for ( j=0; j < quest[i].answers.length; j++ ) {
-                                question.getElementsByClassName("answerZone")[0].innerHTML += quest[i].answers[j];
+                    jsCode+=` for ( j=0; j < quest[i].answers.length; j++ ) {
+                                 question.getElementsByClassName("answerZone")[0].innerHTML += quest[i].answers[j];
                             }
                         }
                         startTimer(params);
@@ -184,8 +181,8 @@ class scormGeny {
                                         var dref = firebase.database().ref();
                                         dref.child("tests/Test"+params.testID+"/"+studentName).set({"score":S, "answers" : userAnswers});`
                         }    
-                        jsCode += ` console.log('You SCORE = '+S+' / 20');
-                                    console.log(userAnswers);
+                        jsCode += ` //console.log('You SCORE = '+S+' / 20');
+                                    //console.log(userAnswers);
                                     //Send SCORE to the LMS
                                     RecordTest(S);}`;
         fs.writeFileSync( this.testPath+'\\ScoTEST\\html\\js\\testQCM.js', jsCode );
