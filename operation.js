@@ -24,7 +24,7 @@ window.addEventListener('beforeunload', (event) => {
        // let answer = saveMessage();
        // (answer==1)?saveFunction():null;
        // One last save to be sure is UP to date
-        if (process.platform == 'darwin') {
+        if (['darwin','linux'].includes(process.platform )) {
             saveTest(openedFile+'/manifest.json');     // this is for MAC machines
         }else{
             saveTest(openedFile+'\\manifest.json');     // this is for windows machiness
@@ -49,7 +49,7 @@ document.getElementById('exit_test').addEventListener('click', (e) => {
     clearInterval(timeOut);   // stop automatic save
     
     // One last save to be sure is UP to date
-    if (process.platform == 'darwin') {
+    if (['darwin','linux'].includes(process.platform )) {
         saveTest(openedFile+'/manifest.json');     // this is for MAC machines
     }else{
         saveTest(openedFile+'\\manifest.json');     // this is for windows machiness
@@ -144,7 +144,7 @@ function newTest() {
         // Create necessary test folders !
         if (!fs.existsSync(path)){
             fs.mkdirSync(path);
-            if (process.platform == 'darwin') fs.mkdirSync(path+'/medias');    // for MAC
+            if (['darwin','linux'].includes(process.platform )) fs.mkdirSync(path+'/medias');    // for MAC
             else fs.mkdirSync(path+'\\medias');                                 // for windows
             process.chdir("../");
         }
@@ -177,7 +177,7 @@ function newTest() {
 regularSave = () => {
     timeOut = setInterval(() => {
         if ( openedFile != null && test.hasChanged == true ) {
-            if (process.platform == 'darwin') {
+            if (['darwin','linux'].includes(process.platform )) {
                 saveTest(openedFile+'/manifest.json');     // this is for MAC machines
             }else{
                 saveTest(openedFile+'\\manifest.json');     // this is for windows machiness
