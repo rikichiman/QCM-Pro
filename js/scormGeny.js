@@ -18,7 +18,7 @@ class scormGeny {
         this.questions = new Array();   // array to save question's text with the correct answer number !
         this.prepareFolder();
         this.makeTest( this.tData.questions );
-
+        this.IFS = (['darwin','linux'].includes(process.platform))?'/':'\\';
     }
 
 
@@ -26,21 +26,21 @@ class scormGeny {
 
         if ( fs.existsSync( this.testPath ) ){
             
-            if (fs.existsSync(this.testPath+'\\ScoTEST')) {
-                fs.rmdirSync(this.testPath+'\\ScoTEST' , { recursive : true});
+            if (fs.existsSync(this.testPath+this.IFS+'ScoTEST')) {
+                fs.rmdirSync(this.testPath+this.IFS+'ScoTEST' , { recursive : true});
             }
             
-            fs.mkdirSync(this.testPath+'\\ScoTEST');
+            fs.mkdirSync(this.testPath+this.IFS+'ScoTEST');
             
-            fs.mkdirSync(this.testPath+'\\ScoTEST\\medias');   // pictures folder
+            fs.mkdirSync(this.testPath+this.IFS+'ScoTEST'+this.IFS+'medias');   // pictures folder
             
-            fs.mkdirSync(this.testPath+'\\ScoTEST\\html');   // test html file 
-            fs.mkdirSync(this.testPath+'\\ScoTEST\\html\\css');   // 
-            fs.mkdirSync(this.testPath+'\\ScoTEST\\html\\js');   // 
+            fs.mkdirSync(this.testPath+this.IFS+'ScoTEST'+this.IFS+'html');   // test html file 
+            fs.mkdirSync(this.testPath+this.IFS+'ScoTEST'+this.IFS+'html'+this.IFS+'css');   // 
+            fs.mkdirSync(this.testPath+this.IFS+'ScoTEST'+this.IFS+'html'+this.IFS+'js');   // 
             
             
             //-----> copy all the media files to the scorm media folder !
-            fs.readdir(this.testPath+'\\medias', (err, files) => {
+            fs.readdir(this.testPath+this.IFS+'medias', (err, files) => {
                 //handling error
                 if (err) {
                     return console.log('Unable to scan directory: ' + err);
@@ -49,7 +49,7 @@ class scormGeny {
                 files.forEach( (file) => {
                     // Do whatever you want to do with the file
                     
-                    fs.copyFileSync( this.testPath+'\\medias\\'+file, this.testPath+'\\ScoTEST\\medias\\'+file);
+                    fs.copyFileSync( this.testPath+this.IFS+'medias'+this.IFS+file, this.testPath+this.IFS+'ScoTEST'+this.IFS+'medias'+this.IFS+file);
                 });
                 
             });
@@ -58,17 +58,17 @@ class scormGeny {
 
             let scoCONF = path.join(__dirname, '../scoGEN');
             // Copie des fichiers de configuration SCORM dans le dossier généré cible  ( scormPath )
-            fs.copyFileSync(scoCONF+'\\adlcp_rootv1p2.xsd', this.testPath+'\\ScoTEST\\adlcp_rootv1p2.xsd');
-            fs.copyFileSync(scoCONF+'\\ims_xml.xsd', this.testPath+'\\ScoTEST\\ims_xml.xsd');
-            fs.copyFileSync(scoCONF+'\\imscp_rootv1p1p2.xsd', this.testPath+'\\ScoTEST\\imscp_rootv1p1p2.xsd');
-            fs.copyFileSync(scoCONF+'\\imsmd_rootv1p2p1.xsd', this.testPath+'\\ScoTEST\\imsmd_rootv1p2p1.xsd');
-            fs.copyFileSync(scoCONF+'\\imsmanifest.xml', this.testPath+'\\ScoTEST\\imsmanifest.xml');
+            fs.copyFileSync(scoCONF+this.IFS+'adlcp_rootv1p2.xsd', this.testPath+this.IFS+'ScoTEST'+this.IFS+'\\adlcp_rootv1p2.xsd');
+            fs.copyFileSync(scoCONF+this.IFS+'ims_xml.xsd', this.testPath+this.IFS+'ScoTEST'+this.IFS+'ims_xml.xsd');
+            fs.copyFileSync(scoCONF+this.IFS+'imscp_rootv1p1p2.xsd', this.testPath+this.IFS+'ScoTEST'+this.IFS+'imscp_rootv1p1p2.xsd');
+            fs.copyFileSync(scoCONF+this.IFS+'imsmd_rootv1p2p1.xsd', this.testPath+this.IFS+'ScoTEST'+this.IFS+'imsmd_rootv1p2p1.xsd');
+            fs.copyFileSync(scoCONF+this.IFS+'imsmanifest.xml', this.testPath+this.IFS+'ScoTEST'+this.IFS+'imsmanifest.xml');
             
-            fs.copyFileSync(scoCONF+'\\finish.png', this.testPath+'\\ScoTEST\\medias\\finish.png');
+            fs.copyFileSync(scoCONF+this.IFS+'finish.png', this.testPath+this.IFS+'ScoTEST'+this.IFS+'medias'+this.IFS+'finish.png');
             // copier le fichier de style du test HTML
-            fs.copyFileSync(scoCONF+'\\style.css', this.testPath+'\\ScoTEST\\html\\css\\style.css');
+            fs.copyFileSync(scoCONF+this.IFS+'style.css', this.testPath+this.IFS+'ScoTEST'+this.IFS+'html'+this.IFS+'css'+this.IFS+'style.css');
             // copier le fichier JS scormfunctions.js 
-            fs.copyFileSync(scoCONF+'\\scormfunctions.js', this.testPath+'\\ScoTEST\\html\\js\\scormfunctions.js');
+            fs.copyFileSync(scoCONF+this.IFS+'scormfunctions.js', this.testPath+this.IFS+'ScoTEST'+this.IFS+'html'+this.IFS+'js'+this.IFS+'scormfunctions.js');
         }
 
     }
@@ -107,7 +107,7 @@ class scormGeny {
                 
                 doc += `</body></html>`;
         
-        fs.writeFileSync( this.testPath+'\\ScoTEST\\html\\index.html', doc );
+        fs.writeFileSync( this.testPath+this.IFS+'ScoTEST'+this.IFS+'html'+this.IFS+'index.html', doc );
 
         this.makeJS( this.makeQuestions( qList ) );
 
@@ -185,7 +185,7 @@ class scormGeny {
                                     //console.log(userAnswers);
                                     //Send SCORE to the LMS
                                     RecordTest(S);}`;
-        fs.writeFileSync( this.testPath+'\\ScoTEST\\html\\js\\testQCM.js', jsCode );
+        fs.writeFileSync( this.testPath+this.IFS+'ScoTEST'+this.IFS+'html'+this.IFS+'js'+this.IFS+'testQCM.js', jsCode );
     }
 
 
