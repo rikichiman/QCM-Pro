@@ -18,6 +18,7 @@ class parameter {
         
         this.dom.appendChild( this.initTitleControl() );
         this.dom.appendChild( this.initTimeControl() );
+        this.dom.appendChild( this.initBayesianControl() );
         this.dom.appendChild( this.initQuestionControl() );
         this.dom.appendChild( this.initAnswerControl() );
         this.dom.appendChild( this.initDbControl() );
@@ -99,6 +100,23 @@ class parameter {
         if ( this.pData.timeOn == true ) timerControl.activateControl();
 
         return timerControl.dom;
+    }
+
+    initBayesianControl(){
+        let bayesianControl = new control('Bayesian test', null);
+
+        bayesianControl.changeFunction = (loaded) => {
+            if ( bayesianControl.isActive() == true ) {
+                this.pData.bayesian = true;
+            } else {
+                this.pData.bayesian = false;
+                console.log('c est false');
+         
+            }
+            if ( loaded == false ) this.parent.triggerChange();
+        }
+        if ( this.pData.bayesian == true ) bayesianControl.activateControl();
+        return bayesianControl.dom;
     }
 
     initQuestionControl() {

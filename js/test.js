@@ -1,18 +1,18 @@
 const {question} = require('./question');
 const {parameter} = require('./parameter');
-const {dataLoader} = require('./dataLoader');   //not used !!
 const { uuid } = require('uuidv4');
 
 const fs = require('fs');
 
 class test {
+    static testData = null;
     static hasChanged = false;
     static testPath = null;     // path to the test folder
     
     constructor(tData) {
-        console.log(tData);
+        //console.log(tData);
         this.tData = tData;
-
+        test.testData = this.tData;
         if ( !this.tData.params.hasOwnProperty('testID') ) {    // If the opned test doesn't have an ID
             this.tData.params.testID = uuid();
         }
@@ -28,6 +28,11 @@ class test {
                             <img src='./icons/addQuestion.png' class='addQuestion'>`;
         this.questions = new Array();
         this.init();
+    }
+
+    getData() {
+
+        return this.tData;
     }
 
     init() {
