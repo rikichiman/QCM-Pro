@@ -11,10 +11,11 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^8.1.1"
+    "electron": "^21.3.0"
   },
   "dependencies": {
-    "archiver": "^4.0.1",
-    "uuidv4": "^6.2.6"
+    "archiver": "^4.0.2",
+    "toastify-js": "^1.12.0",
+    "uuidv4": "^6.2.13"
   }
 }

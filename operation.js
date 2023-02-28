@@ -1,22 +1,11 @@
-var fs = require('fs');
-const { ipcRenderer, remote } = require('electron');
-const {dialog, Menu, MenuItem} = remote;
-const {test} = require('./js/test');
-const {scormGeny} = require('./js/scormGeny');
-//const {dataLoader} = require('./js/dataLoader');  // Not used
-const { uuid } = require('uuidv4');
-
-
 let timeOut = null;   //used in regularSave function
 let openedFile = null;
 let t = null;
-
 let tData = null;
 let dL = null;    // Not used halo there
 
 
-
-// Vérifier si le cours a besoin d'être enregistré avant de fermer l'appli
+ // Vérifier si le cours a besoin d'être enregistré avant de fermer l'appli
 window.addEventListener('beforeunload', (event) => {
     // Cancel the event as stated by the standard.
     event.preventDefault();
@@ -30,18 +19,6 @@ window.addEventListener('beforeunload', (event) => {
             saveTest(openedFile+'\\manifest.json');     // this is for windows machiness
         }
     }
-});
-
-document.getElementById('new').addEventListener('click', (e) =>{
-    e.preventDefault();
-    newTest();
-    regularSave();  
-});
-
-document.getElementById('open').addEventListener('click', (e) =>{
-    e.preventDefault();
-    openTest();
-    regularSave();   // start automatic save
 });
 
 document.getElementById('exit_test').addEventListener('click', (e) => {
@@ -68,45 +45,53 @@ document.getElementById('exit_test').addEventListener('click', (e) => {
 document.getElementById('scorm_test').addEventListener('click', (e) => { 
     e.preventDefault();
     console.log(' Generate scorm process start ..');
-    console.log(tData);
-
     // TODO !!!
-    let mySco = new scormGeny(tData, openedFile);
-    mySco.generate();
-
-
+    scoModule.generateSco();     //===> See preload.js for definition
+    alertSuccess("Scorm package Done");
 });
 
+document.getElementById('new').addEventListener('click', (e) =>{
+    e.preventDefault();
+    ipcRenderer.send("NewTest",1);    // send New Test signal to main process
+});
 
-openTest = () => {
-    let options = { title:"Ouvrir un Test",
-                    defaultPath:(openedFile!=null)?openedFile:(process.platform != 'darwin')?'C:\\':'/', 
-                    properties:["openDirectory"]
-                };
+ipcRenderer.on('newFolder', (f) => {
+    newTest(f);    //f is the folder path
+    regularSave(); 
+});
 
-    //Synchronous
-    let dir = dialog.showOpenDialogSync(options);
-    
-    // Step 1 : check if manifest.json exists ?!  inside the selected folder
-    if (fs.existsSync(dir+'/manifest.json')) {
+// Open an existing test
+document.getElementById('open').addEventListener('click', (e) =>{
+    e.preventDefault();
+    ipcRenderer.send("OpenTest",1);    // send Open Test signal to main process 
+});
+
+ipcRenderer.on('testFolder', (f) => {
+    openTest(f);
+    regularSave();   // start automatic save
+});
+
+openTest = (folder) => {
+   // Step 1 : check if manifest.json exists ?!  inside the selected folder
+    if (fs.existsSync(folder+'/manifest.json')) {
         //file exists
         console.log("Ceci est un Test !");
-        openedFile = dir[0];        //-----> chemin du cours
+        openedFile = folder;        //-----> chemin du cours
+        test.setTestPath(folder[0]);   // variable static testPath inside test.js
         
-        test.testPath = dir[0];   // variable static 
-        console.log(test.testPath);
         // Step 2 : Load the course
-       if ( loadTest(dir + '/manifest.json') )  {
+       if ( loadTest(folder + '/manifest.json') )  {
            document.getElementById('welcome').style.display='none';
            document.getElementById('exitparent').style.display='block';
-           document.getElementById('testpath').getElementsByTagName('span')[0].innerText = dir;
-           coursePath = dir;
-        }
+           document.getElementById('testpath').getElementsByTagName('span')[0].innerText = folder[0];
+           //coursePath = dir;
+        } 
     }else {
         console.log("Fichier manifest inexistant !");
     }
-}
+    
 
+}
 
 loadTest = (path) => {
   
@@ -114,12 +99,8 @@ loadTest = (path) => {
    let jsonFile = JSON.parse(fs.readFileSync(path, 'utf8'));
    
    if (jsonFile.hasOwnProperty('params') && jsonFile.hasOwnProperty('questions')) {
-       
-        
-
         tData = jsonFile;       // --- > assign the jsonfile content to  tData global variable
-        t = new test(tData);
-        //dL = new dataLoader(tData.params);
+        t = test.create(tData);
         return 1;
     }else {
        // Afficher un message d'erreur: ( Format du fichier non adequate )
@@ -130,15 +111,8 @@ loadTest = (path) => {
 
 }
 
+function newTest(path) {
 
-
-
-function newTest() {
-    
-    let path = dialog.showSaveDialogSync(null , {   title:"Enregistrer un test QCM", 
-                                                    defaultPath:(openedFile!=null)?openedFile:(process.platform != 'darwin')?'C:\\':'/', 
-                                                    properties:[""]
-                                                } );
     if (path != undefined) {
         openedFile = path;
         // Create necessary test folders !
@@ -155,10 +129,11 @@ function newTest() {
         tData = {
             
             params: {
-                testID: uuid(),   // ID for the TEST
+                testID: uuid.generate(),   // ID for the TEST
                 title:'',
                 timeOn: false,
                 period: 0,
+                bayesian: false,         // True or false 
                 mixQuestions: false,
                 mixAnswers: false,
                 receiveAnswers: false,
@@ -166,17 +141,15 @@ function newTest() {
             },      // les parametres du test :  chrono, titre etc..c est pas encore clair
             questions : []
         }
-
-        t = new test(tData);
-        test.testPath = openedFile;   // static variable of the class test
-        //console.log(test.testPath);
+        t = test.create(tData);
+        test.setTestPath(openedFile);   // static variable of the class test
     }
 }
 
 // Fonction de sauvegarde à interval de temp régulier  3 secondes
 regularSave = () => {
     timeOut = setInterval(() => {
-        if ( openedFile != null && test.hasChanged == true ) {
+        if ( openedFile != null && test.hasChanged() == true ) {
             if (['darwin','linux'].includes(process.platform )) {
                 saveTest(openedFile+'/manifest.json');     // this is for MAC machines
             }else{
@@ -184,16 +157,32 @@ regularSave = () => {
             }
             
                 
-                //console.log("Save to : "+openedFile+'\\manifest.json');
+                console.log("Save to : "+openedFile+'\\manifest.json');
         }
     }, 3000);
 }
 
-
 function saveTest(path) {
-    fs.writeFile(path, JSON.stringify(tData, null, 4), function (err) {
+
+    fs.writeFile(path, JSON.stringify(test.getTestData(), null, 4), function (err) {
         if (err) throw err;
         console.log('Test is Saved!');
-        test.hasChanged = false;
+        test.setHasChanged(false);
+        alertSuccess("Test saved");
     }); 
+    
+}
+
+function alertSuccess(message) {
+    Toastify.toast({
+      text: message,
+      duration: 2500,
+      close: true,
+      gravity: "top", // `top` or `bottom`
+      position: "left", // `left`, `center` or `right`
+      offset: {
+        x: 0, // horizontal axis - can be a number or a string indicating unity. eg: '2em'
+        y: 60 // vertical axis - can be a number or a string indicating unity. eg: '2em'
+      },
+    });
 }
