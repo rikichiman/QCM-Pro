@@ -32,8 +32,6 @@ function initClickEvent() {
 
         
         },false)
-
-
     }
 
     for (let i = 0 ; i < minus.length; i++) {
